@@ -99,17 +99,6 @@ const copyAll = async () => {
           {{ copied ? "✓ 已复制" : "复制代码" }}
         </Button>
       </div>
-
-      <div class="mt-4 text-sm text-neutral-600">
-        <p class="mb-2 font-medium text-neutral-900">使用提示</p>
-        <p v-if="selectedLang === 'typescript'">适合前端项目,直接作为 const 使用</p>
-        <p v-else-if="selectedLang === 'go'">适合后端服务,复制到你的 go 文件</p>
-        <p v-else-if="selectedLang === 'python'">适合数据处理或脚本项目</p>
-        <p v-else-if="selectedLang === 'rust'">适合性能敏感的项目</p>
-        <p v-else-if="selectedLang === 'java'">适合 Java/Kotlin 项目</p>
-        <p v-else-if="selectedLang === 'json'">适合配置文件或 API 响应</p>
-        <p v-else-if="selectedLang === 'markdown'">适合文档或 README</p>
-      </div>
     </SheetContent>
   </Sheet>
 </template>
