@@ -1,17 +1,20 @@
 <script setup lang="ts">
 const keyword = ref('mountain')
+const page = ref(1)
 import { type UnsplashSearchResponse } from "~~/server/utils/types"
 
 const { data, pending, error, execute } = await useFetch<UnsplashSearchResponse>('/api/search-photos', {
   query: {
     query: keyword,
     per_page: 12,
+    page,
     orientation: 'landscape'
   },
   immediate: true
 })
 
 const search = () => {
+  page.value = 1
   execute()
 }
 
@@ -24,11 +27,18 @@ const copyUrl = async (url: string, index: number) => {
     copiedIndex.value = null
   }, 1500)
 }
+
+const goToPage = (newPage: number) => {
+  if (newPage >= 1 && newPage <= (data.value?.total_pages || 1)) {
+    page.value = newPage
+    execute()
+  }
+}
 </script>
 
 <template>
-  <div class="min-h-screen bg-neutral-50 p-8">
-    <div class="mx-auto max-w-6xl">
+  <div class="min-h-screen bg-neutral-50 py-8">
+    <div class="mx-auto max-w-7xl">
       <!-- Header -->
       <div class="mb-8 text-center">
         <h1 class="mb-2 text-4xl font-bold text-neutral-900">Unsplash Mock</h1>
@@ -62,27 +72,38 @@ const copyUrl = async (url: string, index: number) => {
         <!-- Stats -->
         <div class="flex items-center justify-between">
           <Badge variant="secondary" class="text-sm">
-            找到 {{ data.results.length }} 张图片
+            找到 {{ data.results.length }} 张图片,共 {{ data.total }} 张
           </Badge>
-          <NuxtLink to="/mock">
-            <Button variant="outline" size="sm">
-              复制所有 URL
+          <div class="flex items-center gap-2">
+            <Button variant="outline" size="sm" @click="goToPage(page - 1)" :disabled="page <= 1">
+              上一页
             </Button>
-          </NuxtLink>
+            <span class="text-sm text-neutral-500">
+              第 {{ page }} / {{ data.total_pages || 1 }} 页
+            </span>
+            <Button variant="outline" size="sm" @click="goToPage(page + 1)" :disabled="page >= data.total_pages">
+              下一页
+            </Button>
+            <NuxtLink to="/mock">
+              <Button variant="outline" size="sm">
+                复制所有 URL
+              </Button>
+            </NuxtLink>
+          </div>
         </div>
 
         <!-- Photo Grid -->
         <div v-if="data.results.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <Card v-for="(photo, index) in data.results" :key="photo.id"
-            class="overflow-hidden transition-all hover:shadow-lg">
+            class="overflow-hidden transition-all hover:shadow-lg pt-0">
             <div class="relative aspect-4/3 overflow-hidden bg-neutral-100">
               <img :src="photo.urls.small" :alt="photo.description || 'unsplash photo'"
                 class="h-full w-full object-cover transition-transform hover:scale-105" loading="lazy" />
             </div>
-            <CardContent class="p-4">
+            <CardContent class="pt-0">
               <div class="flex items-center justify-between">
                 <div class="min-w-0 flex-1">
-                  <p class="mt-1 truncate font-mono text-xs text-neutral-400">
+                  <p class="truncate font-mono text-xs text-neutral-400">
                     {{ photo.urls.small }}
                   </p>
                 </div>
