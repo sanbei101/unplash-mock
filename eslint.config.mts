@@ -16,6 +16,7 @@ export default antfu({
     "vue/html-indent": "off",
     "vue/multiline-html-element-content-newline": "off",
     "vue/first-attribute-linebreak": "off",
+    "jsonc/sort-keys": "off",
     "ts/no-unused-vars": [
       "warn",
       {
@@ -27,5 +28,5 @@ export default antfu({
       },
     ],
   },
-  ignores: ["src/components/ui"],
+  ignores: ["**/components/ui"],
 });
