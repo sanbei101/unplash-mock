@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { UnsplashSearchResponse } from "~~/server/utils/types";
+import CodePreviewSheet from "@/components/CodePreviewSheet.vue";
+
 const keyword = ref("mountain");
 const page = ref(1);
 
@@ -37,6 +39,8 @@ const goToPage = (newPage: number) => {
     execute();
   }
 };
+
+const urls = computed(() => data.value?.results?.map((p) => p.urls.small) || []);
 </script>
 
 <template>
@@ -100,9 +104,11 @@ const goToPage = (newPage: number) => {
             >
               下一页
             </Button>
-            <NuxtLink to="/mock">
-              <Button variant="outline" size="sm"> 复制所有 URL </Button>
-            </NuxtLink>
+            <CodePreviewSheet :urls="urls">
+              <template #trigger>
+                <Button variant="outline" size="sm"> 复制所有 URL </Button>
+              </template>
+            </CodePreviewSheet>
           </div>
         </div>
 
