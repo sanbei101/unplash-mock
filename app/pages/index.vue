@@ -1,39 +1,42 @@
 <script setup lang="ts">
-const keyword = ref('mountain')
-const page = ref(1)
-import { type UnsplashSearchResponse } from "~~/server/utils/types"
+import type { UnsplashSearchResponse } from "~~/server/utils/types";
+const keyword = ref("mountain");
+const page = ref(1);
 
-const { data, pending, error, execute } = await useFetch<UnsplashSearchResponse>('/api/search-photos', {
-  query: {
-    query: keyword,
-    per_page: 12,
-    page,
-    orientation: 'landscape'
+const { data, pending, error, execute } = await useFetch<UnsplashSearchResponse>(
+  "/api/search-photos",
+  {
+    query: {
+      query: keyword,
+      per_page: 12,
+      page,
+      orientation: "landscape",
+    },
+    immediate: true,
   },
-  immediate: true
-})
+);
 
 const search = () => {
-  page.value = 1
-  execute()
-}
+  page.value = 1;
+  execute();
+};
 
-const copiedIndex = ref<number | null>(null)
+const copiedIndex = ref<number | null>(null);
 
 const copyUrl = async (url: string, index: number) => {
-  await navigator.clipboard.writeText(url)
-  copiedIndex.value = index
+  await navigator.clipboard.writeText(url);
+  copiedIndex.value = index;
   setTimeout(() => {
-    copiedIndex.value = null
-  }, 1500)
-}
+    copiedIndex.value = null;
+  }, 1500);
+};
 
 const goToPage = (newPage: number) => {
   if (newPage >= 1 && newPage <= (data.value?.total_pages || 1)) {
-    page.value = newPage
-    execute()
+    page.value = newPage;
+    execute();
   }
-}
+};
 </script>
 
 <template>
@@ -47,8 +50,13 @@ const goToPage = (newPage: number) => {
 
       <!-- Search Card -->
       <div class="mb-8 flex gap-3">
-        <Input v-model="keyword" @keyup.enter="search" placeholder="输入搜索词..." class="h-11 text-base" />
-        <Button @click="search" :disabled="pending" size="lg" class="h-11 px-6">
+        <Input
+          v-model="keyword"
+          placeholder="输入搜索词..."
+          class="h-11 text-base"
+          @keyup.enter="search"
+        />
+        <Button :disabled="pending" size="lg" class="h-11 px-6" @click="search">
           <span v-if="pending" class="animate-pulse">搜索中...</span>
           <span v-else>搜索</span>
         </Button>
@@ -60,7 +68,10 @@ const goToPage = (newPage: number) => {
       </div>
 
       <!-- Loading State -->
-      <div v-else-if="pending" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div
+        v-else-if="pending"
+        class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
         <div v-for="i in 8" :key="i" class="animate-pulse">
           <div class="aspect-4/3 rounded-xl bg-neutral-200" />
           <div class="mt-3 h-4 w-3/4 rounded bg-neutral-200" />
@@ -75,30 +86,43 @@ const goToPage = (newPage: number) => {
             找到 {{ data.results.length }} 张图片,共 {{ data.total }} 张
           </Badge>
           <div class="flex items-center gap-2">
-            <Button variant="outline" size="sm" @click="goToPage(page - 1)" :disabled="page <= 1">
+            <Button variant="outline" size="sm" :disabled="page <= 1" @click="goToPage(page - 1)">
               上一页
             </Button>
             <span class="text-sm text-neutral-500">
               第 {{ page }} / {{ data.total_pages || 1 }} 页
             </span>
-            <Button variant="outline" size="sm" @click="goToPage(page + 1)" :disabled="page >= data.total_pages">
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="page >= data.total_pages"
+              @click="goToPage(page + 1)"
+            >
               下一页
             </Button>
             <NuxtLink to="/mock">
-              <Button variant="outline" size="sm">
-                复制所有 URL
-              </Button>
+              <Button variant="outline" size="sm"> 复制所有 URL </Button>
             </NuxtLink>
           </div>
         </div>
 
         <!-- Photo Grid -->
-        <div v-if="data.results.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Card v-for="(photo, index) in data.results" :key="photo.id"
-            class="overflow-hidden transition-all hover:shadow-lg pt-0">
+        <div
+          v-if="data.results.length > 0"
+          class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
+          <Card
+            v-for="(photo, index) in data.results"
+            :key="photo.id"
+            class="overflow-hidden transition-all hover:shadow-lg pt-0"
+          >
             <div class="relative aspect-4/3 overflow-hidden bg-neutral-100">
-              <img :src="photo.urls.small" :alt="photo.description || 'unsplash photo'"
-                class="h-full w-full object-cover transition-transform hover:scale-105" loading="lazy" />
+              <img
+                :src="photo.urls.small"
+                :alt="photo.description || 'unsplash photo'"
+                class="h-full w-full object-cover transition-transform hover:scale-105"
+                loading="lazy"
+              />
             </div>
             <CardContent class="pt-0">
               <div class="flex items-center justify-between">
@@ -107,7 +131,12 @@ const goToPage = (newPage: number) => {
                     {{ photo.urls.small }}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" class="ml-2 shrink-0" @click="copyUrl(photo.urls.small, index)">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="ml-2 shrink-0"
+                  @click="copyUrl(photo.urls.small, index)"
+                >
                   <span v-if="copiedIndex === index" class="text-green-500">✓</span>
                   <span v-else>📋</span>
                 </Button>
