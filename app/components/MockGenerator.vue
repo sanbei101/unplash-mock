@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 
 const props = defineProps<{
   urls: UnsplashURLs[];
@@ -184,15 +185,13 @@ const copyCode = async () => {
         </div>
 
         <div v-if="uploading" class="flex items-center gap-2">
-          <div class="h-2 flex-1 overflow-hidden rounded-full bg-neutral-200">
-            <div
-              class="h-full bg-neutral-900 transition-all"
-              :style="{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }"
-            />
-          </div>
-          <span class="text-sm text-neutral-500"
-            >{{ uploadProgress.current }}/{{ uploadProgress.total }}</span
-          >
+          <Progress
+            :model-value="(uploadProgress.current / uploadProgress.total) * 100"
+            class="flex-1"
+          />
+          <span class="text-sm text-neutral-500 shrink-0">
+            {{ uploadProgress.current }}/{{ uploadProgress.total }}
+          </span>
         </div>
 
         <div v-if="uploadError" class="rounded-md bg-red-50 p-2 text-sm text-red-600">
