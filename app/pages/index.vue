@@ -10,9 +10,21 @@ import {
 } from "@/components/ui/select";
 import MockGenerator from "@/components/MockGenerator.vue";
 import { useClipboard } from "@vueuse/core";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const { copy } = useClipboard();
 const activeTab = ref("photos");
+
+// Image preview dialog
+const previewOpen = ref(false);
+const previewUrl = ref("");
+const previewAlt = ref("");
+
+const openPreview = (photo: UnsplashPhoto) => {
+  previewUrl.value = photo.urls.full;
+  previewAlt.value = (photo.description || "unsplash photo").replace(/\s+/g, " ").trim();
+  previewOpen.value = true;
+};
 
 // Photos Tab
 const keyword = ref("mountain");
@@ -166,7 +178,10 @@ watch(perPage, () => {
               :key="photo.id"
               class="overflow-hidden transition-all hover:shadow-lg pt-0"
             >
-              <div class="relative aspect-4/3 overflow-hidden bg-neutral-100">
+              <div
+                class="relative aspect-4/3 overflow-hidden bg-neutral-100 cursor-pointer"
+                @click="openPreview(photo)"
+              >
                 <img
                   :src="photo.urls.small"
                   :alt="(photo.description || 'unsplash photo').replace(/\s+/g, ' ').trim()"
@@ -208,5 +223,19 @@ watch(perPage, () => {
         <MockGenerator :urls="urls" />
       </div>
     </div>
+
+    <!-- Full Image Preview Dialog -->
+    <Dialog v-model:open="previewOpen">
+      <DialogContent
+        class="sm:max-w-[90vw] max-h-[90vh] p-0 overflow-hidden border-none bg-transparent shadow-none"
+      >
+        <DialogTitle class="sr-only">{{ previewAlt }}</DialogTitle>
+        <img
+          :src="previewUrl"
+          :alt="previewAlt"
+          class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl mx-auto"
+        />
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
