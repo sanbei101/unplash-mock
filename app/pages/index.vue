@@ -167,7 +167,7 @@ watch(perPage, () => {
               <div class="relative aspect-4/3 overflow-hidden bg-neutral-100">
                 <img
                   :src="photo.urls.small"
-                  :alt="photo.description || 'unsplash photo'"
+                  :alt="(photo.description || 'unsplash photo').replace(/\s+/g, ' ').trim()"
                   class="h-full w-full object-cover transition-transform hover:scale-105"
                   loading="lazy"
                 />

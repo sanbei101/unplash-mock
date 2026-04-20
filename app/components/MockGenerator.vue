@@ -148,7 +148,7 @@ const copyCode = async () => {
 </script>
 
 <template>
-  <Card class="border-0 shadow-none bg-transparent">
+  <Card class="border-0 shadow-none bg-transparent p-8">
     <CardContent class="p-0">
       <div class="space-y-4">
         <div class="flex items-center justify-between">
