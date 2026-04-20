@@ -10,13 +10,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-
+import { useClipboard } from "@vueuse/core";
+const { copy, copied } = useClipboard();
+const copyCode = () => copy(formattedCode.value);
 const props = defineProps<{
   urls: UnsplashURLs[];
 }>();
 
 const selectedLang = ref("typescript");
-const copied = ref(false);
 const ossConfigured = ref(false);
 const selectedSize = ref<keyof UnsplashURLs>("regular");
 
@@ -46,9 +47,7 @@ onMounted(async () => {
 
 const getPhotoId = (url: string): string => {
   try {
-    const pathname = new URL(url).pathname;
-    const parts = pathname.split("/");
-    return parts[parts.length - 1] || "";
+    return new URL(url).pathname.split("/").pop() || "";
   } catch {
     return "";
   }
@@ -71,6 +70,8 @@ const uploading = ref(false);
 const uploadProgress = ref({ current: 0, total: 0 });
 const uploadError = ref("");
 
+const MAX_CONCURRENT_UPLOADS = 5;
+
 const handleUploadToOss = async () => {
   if (mockUrls.value.length === 0) {
     uploadError.value = "URL 列表不能为空";
@@ -83,10 +84,16 @@ const handleUploadToOss = async () => {
   const results: string[] = [];
 
   try {
-    for (let i = 0; i < mockUrls.value.length; i++) {
-      uploadProgress.value.current = i + 1;
-      const cdnUrl = await uploadToOss(mockUrls.value[i]!);
-      results.push(cdnUrl);
+    for (let i = 0; i < mockUrls.value.length; i += MAX_CONCURRENT_UPLOADS) {
+      const batch = mockUrls.value.slice(i, i + MAX_CONCURRENT_UPLOADS);
+      const batchResults = await Promise.all(
+        batch.map(async (url, _) => {
+          const cdnUrl = await uploadToOss(url);
+          uploadProgress.value.current++;
+          return cdnUrl;
+        }),
+      );
+      results.push(...batchResults);
     }
     uploadedUrls.value = results;
   } catch (err) {
@@ -137,14 +144,6 @@ const formatUrls = (lang: string, urls: string[]): string => {
 };
 
 const formattedCode = computed(() => formatUrls(selectedLang.value, displayUrls.value));
-
-const copyCode = async () => {
-  await navigator.clipboard.writeText(formattedCode.value);
-  copied.value = true;
-  setTimeout(() => {
-    copied.value = false;
-  }, 1500);
-};
 </script>
 
 <template>
@@ -155,7 +154,7 @@ const copyCode = async () => {
           <div class="flex items-center gap-4">
             <h2 class="text-lg font-semibold text-neutral-900">代码预览</h2>
             <Badge v-if="ossConfigured" variant="secondary" class="text-xs">OSS 已配置</Badge>
-            <Select v-model="selectedSize">
+            <Select v-model="selectedSize" :disabled="uploading">
               <SelectTrigger class="w-35">
                 <SelectValue />
               </SelectTrigger>

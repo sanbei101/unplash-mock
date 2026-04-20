@@ -2,16 +2,35 @@ import { LiteOSS } from "oss-lite";
 import { z } from "zod";
 
 const bodySchema = z.object({
-  url: z.string().url(),
+  url: z.url(),
   filename: z.string(),
 });
+
+let ossClient: LiteOSS | null = null;
+
+function getOSSClient(config: {
+  accessKeyId: string;
+  accessKeySecret: string;
+  bucket: string;
+  region: string;
+}) {
+  if (!ossClient) {
+    ossClient = new LiteOSS({
+      accessKeyId: config.accessKeyId,
+      accessKeySecret: config.accessKeySecret,
+      bucket: config.bucket,
+      region: config.region,
+    });
+  }
+  return ossClient;
+}
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
   const body = await readBody(event);
   const { url, filename } = bodySchema.parse(body);
 
-  const oss = new LiteOSS({
+  const oss = getOSSClient({
     accessKeyId: config.ossAccessKeyId,
     accessKeySecret: config.ossAccessKeySecret,
     bucket: config.ossBucket,

@@ -9,7 +9,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import MockGenerator from "@/components/MockGenerator.vue";
+import { useClipboard } from "@vueuse/core";
 
+const { copy } = useClipboard();
 const activeTab = ref("photos");
 
 // Photos Tab
@@ -41,7 +43,7 @@ const search = () => {
 const copiedIndex = ref<number | null>(null);
 
 const copyUrl = async (url: string, index: number) => {
-  await navigator.clipboard.writeText(url);
+  await copy(url);
   copiedIndex.value = index;
   setTimeout(() => {
     copiedIndex.value = null;
