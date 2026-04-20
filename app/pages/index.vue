@@ -54,7 +54,7 @@ const goToPage = (newPage: number) => {
     execute();
   }
 };
-const urls = computed(() => data.value?.results?.map((p) => p.urls.small) || []);
+const urls = computed(() => data.value?.results?.map((p) => p.urls) || []);
 
 watch(perPage, () => {
   page.value = 1;

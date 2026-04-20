@@ -6,12 +6,28 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     unsplashAccessKey: process.env.NUXT_UNSPLASH_ACCESS_KEY,
+    ossAccessKeyId: process.env.NUXT_OSS_ACCESS_KEY_ID || "",
+    ossAccessKeySecret: process.env.NUXT_OSS_ACCESS_KEY_SECRET || "",
+    ossBucket: process.env.NUXT_OSS_BUCKET || "",
+    ossRegion: process.env.NUXT_OSS_REGION || "oss-cn-beijing",
+    ossCdnBaseUrl: process.env.NUXT_OSS_CDN_BASE_URL || "",
   },
 
   css: ["~/assets/css/tailwind.css"],
 
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: [
+        "oss-lite",
+        "class-variance-authority",
+        "@vueuse/core",
+        "reka-ui",
+        "lucide-vue-next",
+        "clsx",
+        "tailwind-merge",
+      ],
+    },
   },
   modules: ["shadcn-nuxt"],
   shadcn: {
